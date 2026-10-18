@@ -2,7 +2,12 @@
 $database_url = getenv("DATABASE_URL");
 
 if ($database_url) {
-    // Si estamos en Render, parseamos la URL de Neon (PostgreSQL)
+    // Imprimir los drivers disponibles de PDO para verificar si 'pgsql' está activo
+    $drivers = PDO::getAvailableDrivers();
+    if (!in_array('pgsql', $drivers)) {
+        die("Error crítico: El driver PDO 'pgsql' NO está instalado en este contenedor PHP. Drivers disponibles: " . implode(', ', $drivers));
+    }
+
     $db_parsed = parse_url($database_url);
     
     $host = $db_parsed["host"];
@@ -11,15 +16,15 @@ if ($database_url) {
     $dbname = ltrim($db_parsed["path"], "/");
     $port = isset($db_parsed["port"]) ? $db_parsed["port"] : 5432;
 
-    // Conexión mediante PDO para PostgreSQL (Neon)
     try {
         $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require";
         $conexion = new PDO($dsn, $user, $pass, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]);
+        // Si llega aquí, conectó con éxito
     } catch (PDOException $e) {
-        die("Error de conexión a la nube (Neon): " . $e->getMessage());
+        die("Error al conectar con la base de datos de Neon: " . $e->getMessage());
     }
 } else {
     // Configuración local (XAMPP / MySQL)
