@@ -2,7 +2,10 @@
   "builds": [
     {
       "src": "*.php",
-      "use": "vercel-php@0.7.0"
+      "use": "vercel-php@0.7.0",
+      "config": {
+        "nodeVersion": "20.x"
+      }
     }
   ],
   "routes": [
